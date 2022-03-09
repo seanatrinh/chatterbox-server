@@ -1,0 +1,31 @@
+{
+  "name": "chatterbox-server",
+  "version": "1.1.0",
+  "description": "Implement a chat server",
+  "author": "Hack Reactor <curriculum.team@hackreactor.com>",
+  "license": "UNLICENSED",
+  "private": true,
+  "engines": {
+    "node": ">=14.15.0"
+  },
+  "dependencies": {
+    "chai": "^4.2.0",
+    "jquery": "^3.5.1",
+    "mocha": "^5.2.0",
+    "sinon": "^6.3.5",
+    "underscore": "^1.11.0"
+  },
+  "scripts": {
+    "postinstall": "curl -s https://raw.githubusercontent.com/reactorcore/pomander/master/bin/install | bash",
+    "start:server": "node server/basic-server.js",
+    "start:client": "npx live-server",
+    "test": "mocha server/spec",
+    "lint": "eslint ./"
+  },
+  "devDependencies": {
+    "chai": "^4.2.0",
+    "eslint-config-hackreactor": "git://github.com/reactorcore/eslint-config-hackreactor",
+    "mocha": "^8.2.1",
+    "request": "^2.88.2"
+  }
+}
