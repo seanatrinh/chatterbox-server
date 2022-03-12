@@ -12,6 +12,27 @@ this file and include it in basic-server.js so that it actually works.
 
 **************************************************************/
 
+// These headers will allow Cross-Origin Resource Sharing (CORS).
+// This code allows this server to talk to websites that
+// are on different domains, for instance, your chat client.
+//
+// Your chat client is running from a url like file://your/chat/client/index.html,
+// which is considered a different domain.
+//
+// Another way to get around this restriction is to serve you chat
+// client from this domain by setting up static file serving.
+const defaultCorsHeaders = {
+  'access-control-allow-origin': '*',
+  'access-control-allow-methods': 'GET, POST, PUT, DELETE, OPTIONS',
+  'access-control-allow-headers': 'content-type, accept, authorization',
+  'access-control-max-age': 10 // Seconds.
+};
+
+const messages = [{
+  username: 'Jono',
+  text: 'Do my bidding!'
+}];
+
 var requestHandler = function(request, response) {
   // Request and Response come from node's http module.
   //
@@ -22,8 +43,6 @@ var requestHandler = function(request, response) {
   // Documentation for both request and response can be found in the HTTP section at
   // http://nodejs.org/documentation/api/
 
-  // Do some basic logging.
-  //
   // Adding more logging to your server can be an easy way to get passive
   // debugging help, but you should always be careful about leaving stray
   // console.logs in your code.
@@ -32,18 +51,19 @@ var requestHandler = function(request, response) {
   // The outgoing status.
   var statusCode = 200;
 
-  // See the note below about CORS headers.
+  // See the note below about CORS headers. (resolved)
   var headers = defaultCorsHeaders;
 
   // Tell the client we are sending them plain text.
   //
   // You will need to change this if you are sending something
   // other than plain text, like JSON or HTML.
-  headers['Content-Type'] = 'text/plain';
+  // headers['Content-Type'] = 'text/plain';
+  headers['Content-Type'] = 'application/json';
 
   // .writeHead() writes to the request line and headers of the response,
   // which includes the status and all headers.
-  response.writeHead(statusCode, headers);
+  // *********response.writeHead(statusCode, headers);
 
   // Make sure to always call response.end() - Node may not send
   // anything back to the client until you do. The string you pass to
@@ -52,21 +72,30 @@ var requestHandler = function(request, response) {
   //
   // Calling .end "flushes" the response's internal buffer, forcing
   // node to actually send all the data over to the client.
-  response.end('Hello, World!');
+  // *********response.end('Hello, world!');
+
+  // our code
+  debugger;
+  if (request.method === 'GET' && request.url === '/classes/messages') {
+    response.writeHead(200, headers);
+    response.end(JSON.stringify(messages));
+  } else if (request.method === 'POST' && request.url.includes('/classes/messages')) {
+    let message;
+    request.on('data', incoming => {
+      console.log('incoming is this:', incoming);
+      message = incoming;
+    });
+    request.on('end', () => messages.push(message));
+    response.writeHead(201);
+    response.end('it worked');
+  } else if (request.url !== '/classes/messages') {
+    response.writeHead(404);
+    response.end('No endpoint.');
+  }
 };
 
-// These headers will allow Cross-Origin Resource Sharing (CORS).
-// This code allows this server to talk to websites that
-// are on different domains, for instance, your chat client.
-//
-// Your chat client is running from a url like file://your/chat/client/index.html,
-// which is considered a different domain.
-//
-// Another way to get around this restriction is to serve you chat
-// client from this domain by setting up static file serving.
-var defaultCorsHeaders = {
-  'access-control-allow-origin': '*',
-  'access-control-allow-methods': 'GET, POST, PUT, DELETE, OPTIONS',
-  'access-control-allow-headers': 'content-type, accept, authorization',
-  'access-control-max-age': 10 // Seconds.
-};
+// export
+exports.handleRequest = requestHandler;
+
+
+

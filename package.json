@@ -17,7 +17,7 @@
   },
   "scripts": {
     "postinstall": "curl -s https://raw.githubusercontent.com/reactorcore/pomander/master/bin/install | bash",
-    "start:server": "node server/basic-server.js",
+    "start:server": "nodemon server/basic-server.js",
     "start:client": "npx live-server",
     "test": "mocha server/spec",
     "lint": "eslint ./"
