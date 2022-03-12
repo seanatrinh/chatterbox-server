@@ -91,4 +91,58 @@ describe('Node Server Request Listener Function', function() {
     expect(res._ended).to.equal(true);
   });
 
+  it('Should 418 when asked for a special file path /supersecret', function() {
+    var req = new stubs.request('/supersecret', 'GET');
+    var res = new stubs.response();
+
+    handler.requestHandler(req, res);
+
+    expect(res._responseCode).to.equal(418);
+    expect(res._ended).to.equal(true);
+  });
+
+  it('Should 403 when asked for a forbidden file path /forbidden', function() {
+    var req = new stubs.request('/forbidden', 'GET');
+    var res = new stubs.response();
+
+    handler.requestHandler(req, res);
+
+    expect(res._responseCode).to.equal(403);
+    expect(res._ended).to.equal(true);
+  });
+
+  it('Should handle multiple POST requests', function() {
+    var stubMsg = {
+      username: 'Jono',
+      text: 'Do my bidding!'
+    };
+    var stubMsg2 = {
+      username: 'Andy',
+      text: 'Do my bidding, again!'
+    };
+    var req = new stubs.request('/classes/messages', 'POST', stubMsg);
+    var req2 = new stubs.request('/classes/messages', 'POST', stubMsg2);
+    var res = new stubs.response();
+
+    handler.requestHandler(req, res);
+    handler.requestHandler(req2, res);
+
+    expect(res._responseCode).to.equal(201);
+
+    // Now if we request the log for that room the message we posted should be there:
+    req = new stubs.request('/classes/messages', 'GET');
+    res = new stubs.response();
+
+    handler.requestHandler(req, res);
+
+    expect(res._responseCode).to.equal(200);
+    var messages = JSON.parse(res._data);
+    expect(messages.length).to.be.above(0);
+    expect(messages[0].username).to.equal('Jono');
+    expect(messages[0].text).to.equal('Do my bidding!');
+    expect(messages[3].username).to.equal('Andy');
+    expect(messages[3].text).to.equal('Do my bidding, again!');
+    expect(res._ended).to.equal(true);
+  });
+
 });

@@ -32,5 +32,5 @@ var Messages = {
     message.roomname = message.roomname || '';
     return message;
   }
-  
+
 };

@@ -24,14 +24,11 @@ this file and include it in basic-server.js so that it actually works.
 const defaultCorsHeaders = {
   'access-control-allow-origin': '*',
   'access-control-allow-methods': 'GET, POST, PUT, DELETE, OPTIONS',
-  'access-control-allow-headers': 'content-type, accept, authorization',
+  'access-control-allow-headers': 'content-type, accept',
   'access-control-max-age': 10 // Seconds.
 };
 
-const messages = [{
-  username: 'Jono',
-  text: 'Do my bidding!'
-}];
+const messages = [];
 
 var requestHandler = function(request, response) {
   // Request and Response come from node's http module.
@@ -75,27 +72,48 @@ var requestHandler = function(request, response) {
   // *********response.end('Hello, world!');
 
   // our code
-  debugger;
+  // debugger;
+  if (request.method === 'OPTIONS' && request.url === '/classes/messages') {
+    response.writeHead(200, headers);
+    console.log('This is an OPTIONS request');
+    response.end('this is an option');
+  }
   if (request.method === 'GET' && request.url === '/classes/messages') {
     response.writeHead(200, headers);
+    console.log('this is the GET request------', messages);
     response.end(JSON.stringify(messages));
   } else if (request.method === 'POST' && request.url.includes('/classes/messages')) {
-    let message;
-    request.on('data', incoming => {
-      console.log('incoming is this:', incoming);
-      message = incoming;
+    let message = [];
+
+    request.on('error', (error) => {
+      console.log('This is our error---', error);
+    }).on('data', (chunk) => {
+      message.push(chunk);
+    }).on('end', () => {
+      message = JSON.parse(Buffer.concat(message).toString());
+      message['message_id'] = messages.length;
+      messages.push(message);
+      console.log('this is the POST request------', messages);
+      response.writeHead(201, headers);
+      response.end(JSON.stringify(message));
     });
-    request.on('end', () => messages.push(message));
-    response.writeHead(201);
-    response.end('it worked');
+  } else if (request.method === 'GET' && request.url === '/supersecret') {
+    response.writeHead(418);
+    console.log('SECRET-----');
+    response.end('THIS IS SUPER SECRET');
+  } else if (request.method === 'GET' && request.url === '/forbidden') {
+    response.writeHead(403);
+    console.log('FORBIDDEN---');
+    response.end('THIS IS SUPER SECRET');
   } else if (request.url !== '/classes/messages') {
     response.writeHead(404);
+    console.log('we reached a non /classes/messages endpoint');
     response.end('No endpoint.');
   }
 };
 
 // export
-exports.handleRequest = requestHandler;
+exports.requestHandler = requestHandler;
 
 
 

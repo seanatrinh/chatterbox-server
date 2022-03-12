@@ -17,7 +17,7 @@ var App = {
 
 
     // Poll for new messages every 3 sec
-    setInterval(App.fetch, 3000);
+    setInterval(App.fetch, 10000);
   },
 
   fetch: function(callback = ()=>{}) {
