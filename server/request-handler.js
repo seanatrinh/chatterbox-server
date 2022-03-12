@@ -75,39 +75,31 @@ var requestHandler = function(request, response) {
   // debugger;
   if (request.method === 'OPTIONS' && request.url === '/classes/messages') {
     response.writeHead(200, headers);
-    console.log('This is an OPTIONS request');
     response.end('this is an option');
   }
   if (request.method === 'GET' && request.url === '/classes/messages') {
     response.writeHead(200, headers);
-    console.log('this is the GET request------', messages);
     response.end(JSON.stringify(messages));
   } else if (request.method === 'POST' && request.url.includes('/classes/messages')) {
     let message = [];
 
-    request.on('error', (error) => {
-      console.log('This is our error---', error);
-    }).on('data', (chunk) => {
+    request.on('data', (chunk) => {
       message.push(chunk);
     }).on('end', () => {
       message = JSON.parse(Buffer.concat(message).toString());
       message['message_id'] = messages.length;
       messages.push(message);
-      console.log('this is the POST request------', messages);
       response.writeHead(201, headers);
       response.end(JSON.stringify(message));
     });
   } else if (request.method === 'GET' && request.url === '/supersecret') {
     response.writeHead(418);
-    console.log('SECRET-----');
     response.end('THIS IS SUPER SECRET');
   } else if (request.method === 'GET' && request.url === '/forbidden') {
     response.writeHead(403);
-    console.log('FORBIDDEN---');
     response.end('THIS IS SUPER SECRET');
   } else if (request.url !== '/classes/messages') {
     response.writeHead(404);
-    console.log('we reached a non /classes/messages endpoint');
     response.end('No endpoint.');
   }
 };
